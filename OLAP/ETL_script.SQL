@@ -58,7 +58,8 @@ ON CONFLICT (date_key) DO NOTHING;
 INSERT INTO Dim_Brand (brand_id, brand_name)
 SELECT brand_id, brand_name
 FROM brand
-ON CONFLICT (brand_id) DO NOTHING;
+ON CONFLICT (brand_id) DO UPDATE SET
+    brand_name = EXCLUDED.brand_name;
 
 INSERT INTO Dim_Category (category_id, category_name, description)
 SELECT category_id, category_name, description
@@ -188,7 +189,7 @@ SELECT
     dp.product_key AS product_key,
     dd.date_key AS date_key,
     pi.quantity,
-    (pi.quantity * dp.price) AS inventory_value
+    ROUND((pi.quantity * dp.price)::numeric, 2) AS inventory_value
 FROM (
     SELECT DISTINCT ON (product_id) *
     FROM products_inventory
